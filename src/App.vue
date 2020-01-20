@@ -14,6 +14,7 @@ import UnmuteButton from 'unmute'
 var Tone = require('tone')
 import { Key, Chord } from '@tonaljs/modules';
 import chroma from 'chroma-js'
+var _ = require('lodash')
 
 var timeline = new Tone.Timeline()
 Tone.Transport.start()
@@ -43,7 +44,8 @@ class ChoirSection {
     for (let i = 0; i < 15; i++) {
       let osc = new Tone.OmniOscillator({
         type: 'pulse',
-        width: 0.7
+        width: 0.7,
+        detune: _.random(-10, 10)
       }).start()
 
       let env = new Tone.AmplitudeEnvelope({
@@ -133,14 +135,10 @@ class ChoirSection {
     this.formantOut.connect(Tone.Master)
     // this.position = new Tone.Panner(config.position)
     // this.lineOut = new Tone.Gain(0.7)
-
-
   }
 
   start() {
-    // this.envs.forEach(env => env.triggerAttack())
     this.playing = true;
-    console.log('here we go')
   }
 
   stop() {
@@ -305,7 +303,7 @@ export default {
       this.chords = key.chords
     },
     tweenColor(index, startColor, endColor, time) {
-      time = 1000
+      time *= 1000
 
       function tween(counter, index, startColor, endColor, time, vue){
         if(counter < 20){
@@ -322,8 +320,6 @@ export default {
       }
 
       tween(0, index, startColor, endColor, time, this);
-
-
     },
     newChord() {
       let chord = Chord.chord(this.chords[this.$_.random(5)])
@@ -357,10 +353,13 @@ export default {
           let noteSearch = nextNoteName.slice(0, -1);
           let colorVals = this.$_.find(this.colorMap, {note: noteSearch});
 
-
-
           let start = this.$_.random(1, 5)
           startShift += start
+
+          let newEnvConfig = {
+            attack: _.random(1, 5),
+            release: _.random(1, 5)
+          }
 
           let attack = new Tone.Event((time, note) => {
             console.log('attack')
@@ -369,10 +368,11 @@ export default {
             })
 
             synth.envs.forEach(env => {
+              env.set(newEnvConfig)
               env.triggerAttack(time)
             })
 
-            this.tweenColor(index, this.colors[index], colorVals.webColor, synth.attackTime)
+            this.tweenColor(index, this.colors[index], colorVals.webColor, newEnvConfig.attack)
           }, nextNoteFrequency)
 
           attack.type = 'attack'
@@ -381,8 +381,8 @@ export default {
           attack.start(startShift)
           timeline.add(attack)
 
-          let sustain = this.$_.random(2, 7)
-          startShift += sustain
+          let sustain = this.$_.random(3, 11)
+          startShift += newEnvConfig.attack + sustain
 
           let release = new Tone.Event(time => {
             console.log('release')
@@ -390,7 +390,7 @@ export default {
               env.triggerRelease()
             })
 
-            this.tweenColor(index, this.colors[index], '#000000', synth.releaseTime)
+            this.tweenColor(index, this.colors[index], '#000000', newEnvConfig.release)
           })
           release.type = 'release'
           release.time = startShift
@@ -398,7 +398,7 @@ export default {
           release.start(startShift)
           timeline.add(release)
 
-          let releaseTime = synth.release
+          let releaseTime = newEnvConfig.release
           let rest = this.$_.random(3, 10)
           startShift += releaseTime + rest
         }
@@ -412,7 +412,7 @@ export default {
     for(let i = 0; i < 4; i++) {
       let synth = new ChoirSection({
         index: i,
-        position: -1 + i * 0.75,
+        position: -1 + i * 0.5,
 
       })
       synth.changeFormant(5)
