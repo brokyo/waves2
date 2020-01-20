@@ -132,9 +132,9 @@ class ChoirSection {
     /////////////
     // EFFECTS //
     /////////////
-    this.formantOut.connect(Tone.Master)
-    // this.position = new Tone.Panner(config.position)
-    // this.lineOut = new Tone.Gain(0.7)
+    this.position = new Tone.Panner(config.position)
+    this.lineOut = new Tone.Gain(0.7)
+    this.formantOut.chain(this.position, this.lineOut)
   }
 
   start() {
@@ -171,6 +171,13 @@ class ChoirSection {
   }
 }
 
+var reverb = new Tone.Freeverb({
+  roomSize: 0.6,
+  dampening: 1200
+})
+var eq = new Tone.EQ3(-1, -4, -9)
+
+reverb.chain(eq, Tone.Master)
 
 // Vue Stuff
 import logo from '@/components/logo.vue'
@@ -306,7 +313,7 @@ export default {
       time *= 1000
 
       function tween(counter, index, startColor, endColor, time, vue){
-        if(counter < 20){
+        if(counter < 40){
           setTimeout(function(){
             counter++;
 
@@ -341,7 +348,6 @@ export default {
       })
     },
     scheduleEvents() {
-      console.log(timeline.length)
       this.synths.forEach((synth, index) => {
         let startShift = 0
 
@@ -403,7 +409,7 @@ export default {
           startShift += releaseTime + rest
         }
       })
-
+      console.log(timeline)
     }
 
   },
@@ -417,6 +423,7 @@ export default {
       })
       synth.changeFormant(5)
       this.synths.push(synth)
+      synth.lineOut.connect(reverb)
     }
   }
 }
