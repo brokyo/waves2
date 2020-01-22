@@ -1,11 +1,14 @@
 <template>
   <div>
-    <div id="background" :style="{backgroundColor: blendedColor}"></div>
+<!--     <div id="background" :style="{backgroundColor: blendedColor}"></div> -->
     <!-- <router-view/> -->
-    <h1>the sky, the sea, and the earth are just as they are</h1>
+    <!-- <h1>the sky, the sea, and the earth are just as they are</h1> -->
     <button @click="newChord">Chord</button>
     <button @click="scheduleEvents">Schedule Events</button>
     <logo id="logo"></logo>
+    START: {{lights[0].startColor}}
+    END: {{lights[0].endColor}}
+    CURENT: {{lights[0].currentColor}}
   </div>
 </template>
 <script>
@@ -15,6 +18,76 @@ var Tone = require('tone')
 import { Key, Chord } from '@tonaljs/modules';
 import chroma from 'chroma-js'
 var _ = require('lodash')
+import p5 from 'p5'
+
+//////////////
+// Hue shit //
+//////////////
+const v3 = require('node-hue-api').v3
+const discovery = v3.discovery
+const hueApi = v3.api
+
+// const appName = 'waves'
+// const deviceName = 'browser'
+
+// async function discoverBridge() {
+//   const discoveryResults = await discovery.nupnpSearch();
+//   console.log(discoveryResults)
+
+//   if(discoveryResults.length === 0) {
+//     console.error('No bridges found')
+//   } else {
+//     return discoveryResults[0].ipaddress
+//   }
+// }
+
+async function discoverAndCreateUser() {
+  const ipAddress = '10.0.1.2';
+  const api = await hueApi.createInsecureLocal(ipAddress).connect('username');
+  // try {
+  //   createdUser = await unauthenticatedApi.users.createdUser(appName, deviceName)
+  //   console.log(createdUser)
+  //   localStorage.setItem('waves_username', createdUser.username)
+  //   localStorage.setItem('waves_key', createdUser.clientkey)
+  // } catch(err) {
+  //   if (err.getHueErrorType() === 101) {
+  //     console.error('The Link button on the bridge was not pressed. Please press the Link button and try again.');
+  //   } else {
+  //     console.error(`Unexpected Error: ${err.message}`);
+  //   }
+  // }
+}
+
+discoverAndCreateUser()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 var timeline = new Tone.Timeline()
 Tone.Transport.start()
@@ -133,7 +206,7 @@ class ChoirSection {
     // EFFECTS //
     /////////////
     this.position = new Tone.Panner(config.position)
-    this.lineOut = new Tone.Gain(0.7)
+    this.lineOut = new Tone.Gain(0.5)
     this.formantOut.chain(this.position, this.lineOut)
   }
 
@@ -175,7 +248,7 @@ var reverb = new Tone.Freeverb({
   roomSize: 0.6,
   dampening: 1200
 })
-var eq = new Tone.EQ3(-1, -4, -9)
+var eq = new Tone.EQ3(-1, -10, -9)
 
 reverb.chain(eq, Tone.Master)
 
@@ -186,98 +259,98 @@ var formantPresets = require('@/assets/formants.js').formants
 export default {
   data() {
     return {
-      blendedColor: '#000000',
-      colors: ['#000000', '#000000', '#000000', '#000000'],
+      lights: [
+        {
+          id: 0,
+          iterator: 0,
+          iteratorStep: 0.016,
+          changing: false,
+          startColor: {h: 0, s: 0, b:0},
+          endColor: {h: 0, s: 0, b:0},
+          currentColor: {h: 0, s: 0, b:0}
+        },
+        {
+          id: 1,
+          iterator: 0,
+          iteratorStep: 0.016,
+          changing: false,
+          startColor: {h: 0, s: 0, b:0},
+          endColor: {h: 0, s: 0, b:0},
+          currentColor: {h: 0, s: 0, b:0}
+        }
+      ],
       colorMap: [
         {
           note: 'C',
-          webColor: '#FD0000',
-          hueColor: {h: 360, s: 100, b: 100}
+          color: {h: 360, s: 100, b: 100}
         },
         {
           note: 'G',
-          webColor: '#FF8002',
-          hueColor: {h: 30, s: 99, b: 100}
+          color: {h: 30, s: 99, b: 100}
         },
         {
           note: 'D',
-          webColor: '#FEFF04',
-          hueColor: {h: 60, s: 99, b: 100}
+          color: {h: 60, s: 99, b: 100}
         },
         {
           note: 'A',
-          webColor: '#34CC33',
-          hueColor: {h: 120, s: 75, b: 80}
+          color: {h: 120, s: 75, b: 80}
         },
         {
           note: 'E',
-          webColor: '#C1F2FF',
-          hueColor: {h: 192, s: 24, b: 100}
+          color: {h: 192, s: 24, b: 100}
         },
         {
           note: 'B',
-          webColor: '#8ECAFF',
-          hueColor: {h: 208, s: 44, b: 100}
+          color: {h: 208, s: 44, b: 100}
         },
         {
           note: 'F#',
-          webColor: '#7F8AFE',
-          hueColor: {h: 235, s: 50, b: 100}
+          color: {h: 235, s: 50, b: 100}
         },
         {
           note: 'Gb',
-          webColor: '#7F8AFE',
-          hueColor: {h: 235, s: 50, b: 100}
+          color: {h: 235, s: 50, b: 100}
         },
         {
           note: 'C#',
-          webColor: '#9000FF',
-          hueColor: {h: 274, s: 100, b: 100}
+          color: {h: 274, s: 100, b: 100}
         },
         {
           note: 'Db',
-          webColor: '#9000FF',
-          hueColor: {h: 274, s: 100, b: 100}
+          color: {h: 274, s: 100, b: 100}
         },
         {
           note: 'G#',
-          webColor: '#BB75FD',
-          hueColor: {h: 271, s: 54, b: 100}
+          color: {h: 271, s: 54, b: 100}
         },
         {
           note: 'Ab',
-          webColor: '#BB75FD',
-          hueColor: {h: 271, s: 54, b: 100}
+          color: {h: 271, s: 54, b: 100}
         },
         {
           note: 'D#',
-          webColor: '#B8488D',
-          hueColor: {h: 324, s: 64, b: 72}
+          color: {h: 324, s: 64, b: 72}
         },
         {
           note: 'Eb',
-          webColor: '#B8488D',
-          hueColor: {h: 324, s: 64, b: 72}
+          color: {h: 324, s: 64, b: 72}
         },
         {
           note: 'A#',
-          webColor: 'rbg(168, 104, 123)',
-          hueColor: {h: 342, s: 38, b: 66}
+          color: {h: 342, s: 38, b: 66}
         },
         {
           note: 'C#',
-          webColor: '#A66779',
-          hueColor: {h: 342, s: 38, b: 66}
+          color: {h: 342, s: 38, b: 66}
         },
         {
           note: 'Bb',
-          webColor: '#A66779',
-          hueColor: {h: 342, s: 38, b: 66}
+          color: {h: 342, s: 38, b: 66}
         },
         {
           note: 'F',
-          webColor: '#AB0034',
-          hueColor: {h: 342, s: 100, b: 66}
+          color: {h: 342, s: 100, b: 66}
         }
       ],
       portamento: 0.05,
@@ -287,18 +360,51 @@ export default {
       chords: []
     }
   },
-  watch: {
-    colors: { 
-      deep: true,
-      handler() {
-        this.blendedColor = chroma.average(this.colors).hex()
-      }
-    }
-  },
   components: {
     logo
   },
   methods: {
+    createP5() {
+      var background = new p5(sketch => {
+        sketch.setup = () => {
+          sketch.colorMode(sketch.HSB)
+          var canvas = sketch.createCanvas(400, 400)
+        }
+
+        sketch.draw = () => {
+          sketch.colorMode(sketch.HSB)
+          this.lights.forEach(light => {
+            if(light.changing) {
+
+              // console.log(light.startColor)
+              // console.log(light.endColor)
+              let startColor = sketch.color(light.startColor.h, light.startColor.s, light.startColor.b)
+              let endColor = sketch.color(light.endColor.h, light.endColor.s, light.endColor.b)
+              let currentColor = sketch.lerpColor(startColor, endColor, light.iterator)
+              // console.log('start', startColor)
+              // console.log('end', endColor)
+              console.log('current', currentColor)
+              debugger
+              light.currentColor = currentColor
+              light.iterator += light.iteratorStep
+            }
+            
+            if(light.iterator > 1) {
+              light.changing = false
+              light.iterator = 0
+            }
+          })
+          
+          console.log(this.lights[0].currentColor.levels)
+          // let backgroundColor = sketch.lerpColor(sketch.color(this.lights[0].currentColor), sketch.color(this.lights[1].currentColor), 0.5)
+          // let backgroundColor = chroma.average(this.lights[0].currentColor, this.lights[1].currentColor).hex()
+          // console.log(this.lights[0].currentColor)
+          // let backgroundColor = sketch.color(this.lights[0].currentColor.h, this.lights[0].currentColor.s, this.lights[0].currentColor.b)
+          sketch.background(0)
+        }
+
+      })
+    },
     startChoir() {
       synths.forEach(synth = synth.start())
 
@@ -308,25 +414,6 @@ export default {
       let key = Key.minorKey(this.tonic).natural
       this.scale = key.scale
       this.chords = key.chords
-    },
-    tweenColor(index, startColor, endColor, time) {
-      time *= 1000
-
-      function tween(counter, index, startColor, endColor, time, vue){
-        if(counter < 40){
-          setTimeout(function(){
-            counter++;
-
-            let currentColor = vue.colors[index]
-            let nextColor = chroma.mix(currentColor, endColor, counter/12).hex()
-            vue.$set(vue.colors, index, nextColor)
-
-            tween(counter, index, startColor, endColor, time, vue);
-          }, time / 20);
-        }
-      }
-
-      tween(0, index, startColor, endColor, time, this);
     },
     newChord() {
       let chord = Chord.chord(this.chords[this.$_.random(5)])
@@ -349,6 +436,7 @@ export default {
     },
     scheduleEvents() {
       this.synths.forEach((synth, index) => {
+        if(index !== 0) { return }
         let startShift = 0
 
         for (let i = 0; i < 6; i++) {
@@ -359,7 +447,7 @@ export default {
           let noteSearch = nextNoteName.slice(0, -1);
           let colorVals = this.$_.find(this.colorMap, {note: noteSearch});
 
-          let start = this.$_.random(1, 5)
+          let start = this.$_.random(1, 8)
           startShift += start
 
           let newEnvConfig = {
@@ -367,6 +455,9 @@ export default {
             release: _.random(1, 5)
           }
 
+          ////////////
+          // ATTACK //
+          ////////////
           let attack = new Tone.Event((time, note) => {
             console.log('attack')
             synth.oscs.forEach(osc => {
@@ -378,30 +469,44 @@ export default {
               env.triggerAttack(time)
             })
 
-            this.tweenColor(index, this.colors[index], colorVals.webColor, newEnvConfig.attack)
+            if(index < 2) {
+              this.lights[index].changing = true
+              this.lights[index].startColor = this.lights[index].currentColor
+              this.lights[index].endColor = colorVals.color
+              this.lights[index].iteratorStep = 1 / newEnvConfig.attack * 60
+            }
+
           }, nextNoteFrequency)
 
           attack.type = 'attack'
           attack.time = startShift
           attack.section = index
-          attack.start(startShift)
+          attack.start(Tone.Time().now() + startShift)
           timeline.add(attack)
 
-          let sustain = this.$_.random(3, 11)
+          let sustain = this.$_.random(3, 7)
           startShift += newEnvConfig.attack + sustain
 
+          /////////////
+          // RELEASE //
+          /////////////
           let release = new Tone.Event(time => {
             console.log('release')
             synth.envs.forEach(env => {
               env.triggerRelease()
             })
 
-            this.tweenColor(index, this.colors[index], '#000000', newEnvConfig.release)
+            if(index < 2) {
+              this.lights[index].changing = true
+              this.lights[index].startColor = this.lights[index].currentColor
+              this.lights[index].endColor = {h: 0, s: 0, b: 0}
+              this.lights[index].iteratorStep = 1 / newEnvConfig.release * 60              
+            }
           })
           release.type = 'release'
           release.time = startShift
           release.section = index
-          release.start(startShift)
+          release.start(Tone.Time().now() + startShift)
           timeline.add(release)
 
           let releaseTime = newEnvConfig.release
@@ -409,9 +514,7 @@ export default {
           startShift += releaseTime + rest
         }
       })
-      console.log(timeline)
     }
-
   },
   mounted() {
     this.changeTonic('E2')
@@ -425,6 +528,7 @@ export default {
       this.synths.push(synth)
       synth.lineOut.connect(reverb)
     }
+    this.createP5()
   }
 }
 
