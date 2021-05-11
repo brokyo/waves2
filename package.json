@@ -10,7 +10,7 @@
     "@tonaljs/modules": "^3.4.2",
     "chroma-js": "^2.1.0",
     "core-js": "^3.4.4",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "node-hue-api": "4.0.1",
     "p5": "^0.10.2",
     "tone": "^13.8.25",
